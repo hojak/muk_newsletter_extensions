@@ -24,7 +24,7 @@
     "require": {
         "php": ">=5.3",
         "contao/core-bundle" : "~3.5.27 || ~4.4",
-	"davidenke/newsletter_content": ">=0.1.1"
+		"davidenke/newsletter_content": ">=0.1.0"
     },
 
     "autoload": {
