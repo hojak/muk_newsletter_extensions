@@ -33,7 +33,7 @@ ClassLoader::addClasses(array
     // FE-Modules
 
     // ContentElements
-	'MUK\\NewsletterExtensions\\EventElement' => 'system/modules/muk_newsletter_extensions/elements/EventElement.php',
+	//'MUK\\NewsletterExtensions\\EventElement' => 'system/modules/muk_newsletter_extensions/elements/EventElement.php',
 
     // other
 ));
