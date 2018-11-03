@@ -1,6 +1,6 @@
 {
     "name": "muk/newsletter_extensions",
-    "version": "0.1.0",
+    "version": "0.1.1",
     
     "description": "Extension for the newsletter_content module, adding a content element linked with an event",
     "keywords": ["contao", "extension", "newsletter", "event", "content element", "muk"],
