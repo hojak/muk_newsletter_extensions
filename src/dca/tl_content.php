@@ -99,6 +99,9 @@ class tl_content_muk_nl extends \tl_content {
 			
 			$elements = \ContentModel::findByPid ( $dc->activeRecord->muk_event, array ( 'order' => 'sorting' ))->getModels();
 			
+            $event = \CalendarEventsModel::findById ( $dc->activeRecord->muk_event);
+            
+            
 			if ( sizeof ( $elements) == 0 ) {
 				\Message::addError ( "Das Ausgewählte Event hat keinen Content!");
 				$thisModel->muk_event = 0;
@@ -109,25 +112,46 @@ class tl_content_muk_nl extends \tl_content {
 					$element = $elements[$i];
 					
 					if ( $element->type == "text") {
-						\log_message ( "Found Header: " . $element->headline );
+						// \log_message ( "Found Header: " . $element->headline );
 						
 						$thisModel->headline = $element->headline;
 						$thisModel->text = $element->text;
-						$thisModel->addImage = $element->addImage;
-						$thisModel->singleSRC = $element->singleSRC;
-						$thisModel->imagemargin = $element->imagemargin;
-						$thisModel->overwriteMeta = $element->overwriteMeta;
-						$thisModel->alt = $element->alt;
-						$thisModel->imageTitle = $element->imageTitle;
-						$thisModel->size = $element->size;
-						$thisModel->imageMargin = $element->imageMargin;
-						$thisModel->fullsize = $element->fullsize;
-						$thisModel->caption = $element->caption;
-						$thisModel->floating = $element->floating;
 						
+						\Message::addInfo ( "Der Überschrift und Text vom " . ($i+1). ". gefundenen Element wurde in dieses Formular kopiert.");
+                        
+                        if ( $event->addImage ) {
+                            $thisModel->addImage = $event->addImage;
+                            $thisModel->singleSRC = $event->singleSRC;
+                            $thisModel->imagemargin = $event->imagemargin;
+                            $thisModel->overwriteMeta = $event->overwriteMeta;
+                            $thisModel->alt = $event->alt;
+                            $thisModel->imageTitle = $event->imageTitle;
+                            $thisModel->size = $event->size;
+                            $thisModel->imageMargin = $event->imageMargin;
+                            $thisModel->fullsize = $event->fullsize;
+                            $thisModel->caption = $event->caption;
+                            $thisModel->floating = $event->floating;
+                            
+                            \Message::addInfo ( "Die Bildeinstellungen wurden vom ausgewählten Event übernommen!");
+                        } elseif ( $element->addImage ) {
+                            $thisModel->addImage = $element->addImage;
+                            $thisModel->singleSRC = $element->singleSRC;
+                            $thisModel->imagemargin = $element->imagemargin;
+                            $thisModel->overwriteMeta = $element->overwriteMeta;
+                            $thisModel->alt = $element->alt;
+                            $thisModel->imageTitle = $element->imageTitle;
+                            $thisModel->size = $element->size;
+                            $thisModel->imageMargin = $element->imageMargin;
+                            $thisModel->fullsize = $element->fullsize;
+                            $thisModel->caption = $element->caption;
+                            $thisModel->floating = $element->floating;
+                            
+                            \Message::addInfo ( "Das Event hatte kein Bild. Die Bildeinstellungen wurden vom ersten Text-Inhaltselement übernommen!");
+                        } else {
+                            \Message::addInfo ( "Weder für das Event noch für das erste Text-Element ist ein Bild definiert!");
+                        }
+                        
 						$thisModel->save();
-						
-						\Message::addInfo ( "Der Inhalt vom " . ($i+1). ". gefundenen Element wurde in dieses Formular kopiert.");
 						
 						$found = true;
 					}
@@ -146,7 +170,8 @@ class tl_content_muk_nl extends \tl_content {
 	}
 	
 	
-	function get_calendar_options ( $dc ) { 
+	function get_calendar_options ( $dc ) {
+ 
 		$dbResult = $this->Database->prepare ( "select id, title from tl_calendar order by title")->execute();
         
         if ( $dbResult->numRows == 0) {
