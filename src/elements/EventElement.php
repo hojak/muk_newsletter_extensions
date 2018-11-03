@@ -1,10 +1,7 @@
 <?php
 
-
 namespace MUK\NewsletterExtentions;
 
-
-\log_message ( "loaded Event Element" );
 
 class EventElement extends \NewsletterContent\Elements\ContentText {
 
@@ -20,16 +17,13 @@ class EventElement extends \NewsletterContent\Elements\ContentText {
 	 * Generate the content element
 	 */
 	protected function compile() {
-		log_message ( "compiling event element!" );
-		
 		parent::compile();
 		
 		// make event available to the template
 		
 		$this->Template->event = \CalendarEventsModel::findById ( $this->muk_event );
 		
-		
-		log_message ( "template: " . $this->strTemplate );
+		// log_message ( "template: " . $this->strTemplate );
 	}
 	
 }
