@@ -96,75 +96,80 @@ class tl_content_muk_nl extends \tl_content {
 		if ( ! $this->stored['event'] && $dc->activeRecord->muk_event  ) {
 			// ok, an event has been selected! -> set the content!
 			$thisModel = \ContentModel::findById ( $dc->activeRecord->id );
-			
-			$elements = \ContentModel::findByPid ( $dc->activeRecord->muk_event, array ( 'order' => 'sorting' ))->getModels();
-			
             $event = \CalendarEventsModel::findById ( $dc->activeRecord->muk_event);
-            
-            
+			
+			$elements = \ContentModel::findByPid ( $dc->activeRecord->muk_event, array ( 'order' => 'sorting' ));
+			if ( $elements ) 
+				$elements = $elements->getModels();
+			else
+				$elements = array ();
+
+			$thisModel->overwriteMeta = 1;
+			$thisModel->imageUrl = \Events::generateEventUrl ( $event ); 
+			$thisModel->headline = serialize ( array ( 'unit' => 'h2', 'value' => $event->title ));
+			
+			$eventImage = false;
+			if ( $event->addImage ) {
+				$thisModel->addImage = $event->addImage;
+				$thisModel->singleSRC = $event->singleSRC;
+				$thisModel->imagemargin = $event->imagemargin;
+				$thisModel->alt = $event->alt;
+				$thisModel->imageTitle = $event->imageTitle;
+				$thisModel->size = $event->size;
+				$thisModel->imageMargin = $event->imageMargin;
+				$thisModel->fullsize = $event->fullsize;
+				$thisModel->caption = $event->caption;
+				$thisModel->floating = $event->floating;
+				
+				$eventImage = true;
+				\Message::addInfo ( "Die Bildeinstellungen wurden vom ausgewählten Event übernommen!");
+			}
+			
+            $found = false; 
+			
 			if ( sizeof ( $elements) == 0 ) {
-				\Message::addError ( "Das Ausgewählte Event hat keinen Content!");
-				$thisModel->muk_event = 0;
-				$thisModel->save();
+				\Message::addInfo ( "Das ausgewählte Event hat keinen Content!");
 			} else {
-				$found = false; $i = 0;
+				$i = 0;
 				while ( ! $found && $i < sizeof ( $elements) ) {
 					$element = $elements[$i];
 					
 					if ( $element->type == "text") {
-						// \log_message ( "Found Header: " . $element->headline );
-						
-						$thisModel->headline = $element->headline;
 						$thisModel->text = $element->text;
-						
-						\Message::addInfo ( "Der Überschrift und Text vom " . ($i+1). ". gefundenen Element wurde in dieses Formular kopiert.");
+						\Message::addInfo ( "Der Text vom " . ($i+1). ". gefundenen Element wurde in dieses Formular kopiert.");
                         
-                        if ( $event->addImage ) {
-                            $thisModel->addImage = $event->addImage;
-                            $thisModel->singleSRC = $event->singleSRC;
-                            $thisModel->imagemargin = $event->imagemargin;
-                            $thisModel->overwriteMeta = $event->overwriteMeta;
-                            $thisModel->alt = $event->alt;
-                            $thisModel->imageTitle = $event->imageTitle;
-                            $thisModel->size = $event->size;
-                            $thisModel->imageMargin = $event->imageMargin;
-                            $thisModel->fullsize = $event->fullsize;
-                            $thisModel->caption = $event->caption;
-                            $thisModel->floating = $event->floating;
-                            
-                            \Message::addInfo ( "Die Bildeinstellungen wurden vom ausgewählten Event übernommen!");
-                        } elseif ( $element->addImage ) {
-                            $thisModel->addImage = $element->addImage;
-                            $thisModel->singleSRC = $element->singleSRC;
-                            $thisModel->imagemargin = $element->imagemargin;
-                            $thisModel->overwriteMeta = $element->overwriteMeta;
-                            $thisModel->alt = $element->alt;
-                            $thisModel->imageTitle = $element->imageTitle;
-                            $thisModel->size = $element->size;
-                            $thisModel->imageMargin = $element->imageMargin;
-                            $thisModel->fullsize = $element->fullsize;
-                            $thisModel->caption = $element->caption;
-                            $thisModel->floating = $element->floating;
-                            
-                            \Message::addInfo ( "Das Event hatte kein Bild. Die Bildeinstellungen wurden vom ersten Text-Inhaltselement übernommen!");
-                        } else {
-                            \Message::addInfo ( "Weder für das Event noch für das erste Text-Element ist ein Bild definiert!");
-                        }
-                        
-						$thisModel->save();
+						if ( ! $eventImage ) {
+							if ( $element->addImage ) {
+								$thisModel->addImage = $element->addImage;
+								$thisModel->singleSRC = $element->singleSRC;
+								$thisModel->imagemargin = $element->imagemargin;
+								$thisModel->alt = $element->alt;
+								$thisModel->imageTitle = $element->imageTitle;
+								$thisModel->size = $element->size;
+								$thisModel->imageMargin = $element->imageMargin;
+								$thisModel->fullsize = $element->fullsize;
+								$thisModel->caption = $element->caption;
+								$thisModel->floating = $element->floating;
+								
+								\Message::addInfo ( "Das Event hatte kein Bild. Die Bildeinstellungen wurden vom ersten Text-Inhaltselement übernommen!");
+							} else {
+								\Message::addInfo ( "Weder für das Event noch für das erste Text-Element ist ein Bild definiert!");
+							}
+						}
 						
 						$found = true;
 					}
 					
 					$i++;
 				}
-				
-				if ( ! $found ) {
-					\Message::addError ( "Das ausgewählte Event enthält scheinbar keine Text-Elemente als Inhalt!");
-					$thisModel->muk_event = 0;		
-					$thisModel->save();
-				}
 			}
+			
+			if ( ! $found ) {
+				$thisModel->text = $event->teaser;
+				\Message::addInfo ( "Das ausgewählte Event enthält keine Text-Elemente als Inhalt!");
+			}
+			
+			$thisModel->save();
 			
 		}
 	}
